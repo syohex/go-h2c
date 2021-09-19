@@ -49,6 +49,11 @@ func main() {
 	os.Exit(_main())
 }
 
+func isSupportedMethod(method string) bool {
+	m := strings.ToUpper(method)
+	return m == "GET" || m == "POST" || m == "HEAD" || m == "PUT" || m == "OPTIONS"
+}
+
 func readInput(r io.Reader) (*request, error) {
 	const (
 		stateRequestLine = iota
@@ -102,6 +107,10 @@ func readInput(r io.Reader) (*request, error) {
 
 	if _, ok := req.header["host"]; !ok {
 		return nil, fmt.Errorf("no host: header makes it impossible to tell URL")
+	}
+
+	if !isSupportedMethod(req.method) {
+		return nil, fmt.Errorf("unsupported HTTP method: '%s'", req.method)
 	}
 
 	if bodyBuf.Len() > 0 {

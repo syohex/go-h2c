@@ -35,6 +35,10 @@ Shoesize: 12
 `)
 	_, err2 := readInput(input2)
 	assert.NotNil(t, err2, "no host header")
+
+	input3 := strings.NewReader(`FOO / HTTP/1.1`)
+	_, err3 := readInput(input3)
+	assert.NotNil(t, err3, "unsupported HTTP method")
 }
 
 func Test_readInputWithBody(t *testing.T) {
