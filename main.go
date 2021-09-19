@@ -27,7 +27,7 @@ type request struct {
 	http      string
 	header    map[string]string
 	exactCase map[string]string
-	body      string
+	body      []string
 }
 
 var opt option
@@ -67,7 +67,6 @@ func readInput(r io.Reader) (*request, error) {
 
 	state := stateRequestLine
 	scanner := bufio.NewScanner(r)
-	var bodyBuf strings.Builder
 	for scanner.Scan() {
 		line := scanner.Text()
 		if state == stateRequestLine {
@@ -101,8 +100,7 @@ func readInput(r io.Reader) (*request, error) {
 			continue
 		}
 
-		bodyBuf.WriteString(line)
-		bodyBuf.WriteRune('\n')
+		req.body = append(req.body, line)
 	}
 
 	if _, ok := req.header["host"]; !ok {
@@ -111,11 +109,6 @@ func readInput(r io.Reader) (*request, error) {
 
 	if !isSupportedMethod(req.method) {
 		return nil, fmt.Errorf("unsupported HTTP method: '%s'", req.method)
-	}
-
-	if bodyBuf.Len() > 0 {
-		req.body = bodyBuf.String()
-		req.body = strings.TrimRight(req.body, "\n")
 	}
 
 	return &req, nil

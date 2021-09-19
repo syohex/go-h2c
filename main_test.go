@@ -55,7 +55,6 @@ Content-Length: 57
 	req, err := readInput(input)
 	assert.Nil(t, err)
 
-	expected := `{"I do not speak": "jason"}
-{"I do not write": "either"}`
+	expected := []string{`{"I do not speak": "jason"}`, `{"I do not write": "either"}`}
 	assert.Equal(t, req.body, expected, "body")
 }
