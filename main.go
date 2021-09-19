@@ -17,7 +17,6 @@ type option struct {
 	useHTTP                bool
 	ignoreHTTPVersion      bool
 	useLibCurl             bool
-	note                   bool
 	useShortOpt            bool
 	verbose                bool
 }
@@ -33,7 +32,7 @@ type request struct {
 
 var opt option
 var requestLineRe = regexp.MustCompile(`([^ ]*) +(.*) +(HTTP/.*)`)
-var headerRe = regexp.MustCompile(`(^:)*: *(.*)`)
+var headerRe = regexp.MustCompile(`([^:]*): *(.*)`)
 
 func init() {
 	flag.BoolVar(&opt.help, "h", false, "Show help")
@@ -42,7 +41,6 @@ func init() {
 	flag.BoolVar(&opt.useHTTP, "H", false, "Output HTTP generated URLs instead")
 	flag.BoolVar(&opt.ignoreHTTPVersion, "i", true, "Ignore HTTP version")
 	flag.BoolVar(&opt.useLibCurl, "libcurl", false, "Output libcurl code instead")
-	flag.BoolVar(&opt.note, "n", false, "Output notes after command line")
 	flag.BoolVar(&opt.useShortOpt, "s", false, "Use short command line options")
 	flag.BoolVar(&opt.verbose, "v", false, "Add a verbose option to the command line")
 }
@@ -59,6 +57,9 @@ func readInput(r io.Reader) (*request, error) {
 	)
 
 	var req request
+	req.header = make(map[string]string)
+	req.exactCase = make(map[string]string)
+
 	state := stateRequestLine
 	scanner := bufio.NewScanner(r)
 	var bodyBuf strings.Builder
@@ -96,10 +97,16 @@ func readInput(r io.Reader) (*request, error) {
 		}
 
 		bodyBuf.WriteString(line)
+		bodyBuf.WriteRune('\n')
 	}
 
 	if _, ok := req.header["host"]; !ok {
 		return nil, fmt.Errorf("no host: header makes it impossible to tell URL")
+	}
+
+	if bodyBuf.Len() > 0 {
+		req.body = bodyBuf.String()
+		req.body = strings.TrimRight(req.body, "\n")
 	}
 
 	return &req, nil
