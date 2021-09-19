@@ -1,0 +1,10 @@
+PUT /this is me HTTP/2
+Host: curl.haxx.se
+User-Agent: moo on you all
+Shoesize: 12
+Cookie: a=12; b=23
+Content-Type: application/json
+Content-Length: 57
+
+{"I do not speak": "jason"}
+{"I do not write": "either"}
